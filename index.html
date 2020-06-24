@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Sage Intacct Student Registration</title>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    </head>
+    <body>
+        <div ng-app="myApp" ng-controller="myCtrl as myCtrl">
+
+            <h2 class="text-center mrgbtm-40">
+            <img src="https://ssfllp.com/wp-content/uploads/2017/11/Sage-Intacct.jpg"  style="width: 40px;height: 40px;">
+            Sage Intacct Student Registration</h2>
+            <ul>
+              <li><a href="" ng-click="myCtrl.showMenu('reg_sd')">Register Student Details</a></li>
+              <li><a href="" ng-click="myCtrl.showMenu('view_sd')">View Student Details</a></li>
+              <li><a href="" ng-click="myCtrl.showMenu('reg_cd')">Register Course Details</a></li>
+              <li><a href="" ng-click="myCtrl.showMenu('view_cd')">View Course Details</a></li>
+              <li><a href="" ng-click="myCtrl.showMenu('sc_reg')">Student Course Registration</a></li>
+              <li><a href="" ng-click="myCtrl.showMenu('view_report')">Report</a></li>
+            </ul>
+            <div ng-if="myCtrl.showRegStudDetPage">
+                <div class="menu-title">Register Student Details</div>
+                <form class="form-horizontal">
+                    <div class="form-group">
+                        <label class="control-label col-sm-4" for="first_name">First Name:</label>
+                        <div class="col-sm-4">
+                          <input type="text" class="form-control" maxlength="64" ng-model="myCtrl.regStudDet.first_name" id="first_name" placeholder="Enter First Name" >
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-sm-4" for="last_name">Last Name:</label>
+                        <div class="col-sm-4">
+                          <input type="text" class="form-control"  maxlength="64" ng-model="myCtrl.regStudDet.last_name" id="last_name" placeholder="Enter Last Name" >
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-sm-4" for="dob">DOB:</label>
+                        <div class="col-sm-4">
+                          <input type="date" id="birthday" class="form-control"  placeholder="Enter DOB" >
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-sm-4" for="contact_no">Contact No:</label>
+                        <div class="col-sm-4">
+                            <input type="number"  class="form-control" ng-model="myCtrl.regStudDet.contact_no" id="contact_no" placeholder="Enter Contact No" >
+                        </div>
+                    </div>
+                    <div ng-if="myCtrl.showRegSd" class="red txt-center">Please fill all the required fields to proceed.</div>
+                    <div class="form-group">
+                        <div class="col-sm-offset-2 col-sm-10">
+                          <button type="submit" class="btn btn-default btn-mgn" ng-click="myCtrl.validateDetails('reg_sd',myCtrl.regStudDet)">Submit</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div ng-if="myCtrl.showViewStudDetPage">
+                <div class="menu-title">View Student Details</div>                
+                <div class="col-xs-12 col-sm-12 co-md-12 col-lg-12 bgclr-white mrgtop-2" ng-if="myCtrl.tableData.length>0">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>First Name</th>
+                                    <th>Last Name</th>
+                                    <th>DOB</th>
+                                    <th>Contact Number</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="tableData in myCtrl.tableData track by $index">
+                                    <td ng-bind="tableData.id"></td>
+                                    <td ng-bind="tableData.first_name"></td>
+                                    <td ng-bind="tableData.last_name||'-'"></td>
+                                    <td ng-bind="tableData.dob||'-'"></td>
+                                    <td ng-bind="tableData.contact_no||'-'"></td>
+                                    <td>
+                                        <button type="button" class="btn btn-primary" ng-click="myCtrl.openModal('myModal','edit','edit_sd',tableData)">
+                                            <i class="fa fa-edit" style="font-size:20px"></i>
+                                          </button>
+                                          <button type="button" class="btn btn-primary" ng-click="myCtrl.openModal('deleteModal','delete','delete_sd',tableData.id)">
+                                            <i class="fa fa-trash" style="font-size:20px"></i>
+                                          </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                        <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                            <span>Showing</span>&nbsp;
+                            <span ng-bind="(myCtrl.startIndex*(myCtrl.limitIndex))+1"></span>&nbsp;
+                            <span>to</span>&nbsp;
+                            <span ng-bind="myCtrl.totalItems>(myCtrl.startIndex*(myCtrl.limitIndex))+(myCtrl.limitIndex)?(myCtrl.startIndex*(myCtrl.limitIndex))+(myCtrl.limitIndex):myCtrl.totalItems"></span>&nbsp;
+                            <span>of</span>&nbsp;
+                            <span ng-bind="myCtrl.totalItems"></span>&nbsp;
+                            <span>entries</span>
+                        </div>
+                        <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                            <span>
+                                <button class="prvsBtns" ng-disabled="myCtrl.startIndex == 0" ng-click="myCtrl.startIndex = myCtrl.startIndex - 1; myCtrl.setPage('view_sd', myCtrl.startIndex);"><<
+                                </button>
+                            </span>
+                            <span>
+                                <span class="paginationnmbr" ng-repeat="item in myCtrl.itemsPaginated()" ng-click="myCtrl.setPage('view_sd', item - 1)" ng-class="{'activepagintion':myCtrl.startIndex == item - 1,'deactivepagintion':myCtrl.startIndex != item - 1}" ng-bind="item" ng-disabled="true">
+                                </span>
+                            </span>
+                            <span>
+                                <button class="nextBtns" ng-disabled="myCtrl.startIndex >= myCtrl.totalItems / myCtrl.limitIndex - 1" ng-click="myCtrl.startIndex = myCtrl.startIndex + 1; myCtrl.setPage('view_sd', myCtrl.startIndex);"> >>
+                                </button>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xs-12 col-sm-12 co-md-12 col-lg-12 bgclr-white mrgtop-2" ng-if="myCtrl.tableData.length==0" > 0>
+                    No Data to Show
+                </div>
+            </div>
+            <div ng-if="myCtrl.showRegCourseDetPage">
+                <div class="menu-title">Register Course Details</div>
+                <form class="form-horizontal">
+                    <div class="form-group">
+                        <label class="control-label col-sm-4" for="course_name">Course Name:</label>
+                        <div class="col-sm-4">
+                          <input type="text" class="form-control" maxlength="64" ng-model="myCtrl.regCourseDet.course_name" id="course_name" placeholder="Enter Course Name" >
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-sm-4" for="course_details">Course Details:</label>
+                        <div class="col-sm-4">
+                            <textarea ng-model="myCtrl.regCourseDet.course_details" maxlength="264" id="course_details" rows="4" cols="50" ></textarea>
+                        </div>
+                    </div>
+                    <div ng-if="myCtrl.showRegCd" class="red txt-center">Please fill all the required fields to proceed.</div>
+                    <div class="form-group">
+                        <div class="col-sm-offset-2 col-sm-10">
+                          <button type="submit" class="btn btn-default btn-mgn" ng-click="myCtrl.validateDetails('reg_cd',myCtrl.regCourseDet)">Submit</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div ng-if="myCtrl.showViewCourseDetPage">
+                <div class="menu-title">View Course Details</div>
+                <div class="col-xs-12 col-sm-12 co-md-12 col-lg-12 bgclr-white mrgtop-2" ng-if="myCtrl.tableData.length>0">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Course Name</th>
+                                    <th>Course Details</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="tableData in myCtrl.tableData track by $index">
+                                    <td ng-bind="tableData.id"></td>
+                                    <td ng-bind="tableData.course_name"></td>
+                                    <td ng-bind="tableData.course_details||'-'"></td>
+                                    <td>
+                                        <button type="button" class="btn btn-primary" ng-click="myCtrl.openModal('myModal','edit','edit_cd',tableData)">
+                                            <i class="fa fa-edit" style="font-size:20px"></i>
+                                          </button>
+                                          <button type="button" class="btn btn-primary" ng-click="myCtrl.openModal('deleteModal','delete','delete_cd',tableData.id)">
+                                            <i class="fa fa-trash" style="font-size:20px"></i>
+                                          </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                        <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                            <span>Showing</span>&nbsp;
+                            <span ng-bind="(myCtrl.startIndex*(myCtrl.limitIndex))+1"></span>&nbsp;
+                            <span>to</span>&nbsp;
+                            <span ng-bind="myCtrl.totalItems>(myCtrl.startIndex*(myCtrl.limitIndex))+(myCtrl.limitIndex)?(myCtrl.startIndex*(myCtrl.limitIndex))+(myCtrl.limitIndex):myCtrl.totalItems"></span>&nbsp;
+                            <span>of</span>&nbsp;
+                            <span ng-bind="myCtrl.totalItems"></span>&nbsp;
+                            <span>entries</span>
+                        </div>
+                        <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                            <span>
+                                <button class="prvsBtns" ng-disabled="myCtrl.startIndex == 0" ng-click="myCtrl.startIndex = myCtrl.startIndex - 1; myCtrl.setPage('view_cd', myCtrl.startIndex);"><<
+                                </button>
+                            </span>
+                            <span>
+                                <span class="paginationnmbr" ng-repeat="item in myCtrl.itemsPaginated()" ng-click="myCtrl.setPage('view_cd', item - 1)" ng-class="{'activepagintion':myCtrl.startIndex == item - 1,'deactivepagintion':myCtrl.startIndex != item - 1}" ng-bind="item" ng-disabled="true">
+                                </span>
+                            </span>
+                            <span>
+                                <button class="nextBtns" ng-disabled="myCtrl.startIndex >= myCtrl.totalItems / myCtrl.limitIndex - 1" ng-click="myCtrl.startIndex = myCtrl.startIndex + 1; myCtrl.setPage('view_cd', myCtrl.startIndex);"> >>
+                                </button>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xs-12 col-sm-12 co-md-12 col-lg-12 bgclr-white mrgtop-2" ng-if="myCtrl.tableData.length==0" > 0>
+                    No Data to Show
+                </div>
+            </div>
+            <div ng-if="myCtrl.showSCRegPage">
+                <div class="menu-title">Student Course Registration</div>
+                <div class="col-xs-12 col-sm-12 co-md-12 col-lg-12" ng-repeat="scData in myCtrl.scData track by $index">
+                    <div class="col-xs-5 col-sm-5 co-md-5 col-lg-5 form-group">
+                        <select class="form-control" name="oem" id="stud_id" ng-model="myCtrl.scReg[$index].stud_id" >
+                            <option value="">Select</option>
+                            <option value="{{s.stud_id}}" ng-repeat="s in myCtrl.studCourseData.stud_data" ng-bind="s.stud_name"></option>
+                        </select>
+                    </div>
+                    <div class="col-xs-5 col-sm-5 co-md-5 col-lg-5 form-group">
+                        <select class="form-control" name="oem" id="stud_id" ng-model="myCtrl.scReg[$index].course_id" >
+                            <option value="">Select</option>
+                            <option value="{{c.course_id}}" ng-repeat="c in myCtrl.studCourseData.course_data" ng-bind="c.course_name"></option>
+                        </select>
+                    </div>
+                    <div class="col-xs-2 col-sm-2 co-md-2 col-lg-2 cpointer" ng-click="myCtrl.generateData()"><i class="fa fa-plus" style="font-size:20px"></i></div>
+                </div>
+                <div ng-if="myCtrl.showScRegFlag" class="red txt-center">Please fill all the required fields to proceed.</div>
+                <div class="form-group">
+                    <div class="col-sm-offset-2 col-sm-10">
+                      <button type="submit" class="btn btn-default btn-mgn" ng-click="myCtrl.generateData('reset')">Reset</button>
+                      <button type="submit" class="btn btn-default mgn-top-50" ng-click="myCtrl.validateDetails('save_sc_reg',myCtrl.scReg)">Submit</button>
+                    </div>
+                </div>
+                
+            </div>
+            <div ng-if="myCtrl.showReportPage">
+                <div class="menu-title">View Report</div>
+                <div class="col-xs-12 col-sm-12 co-md-12 col-lg-12 bgclr-white mrgtop-2" ng-if="myCtrl.tableData.length>0">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Student Name</th>
+                                    <th>Course Name</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="tableData in myCtrl.tableData track by $index">
+                                    <td ng-bind="tableData.id"></td>
+                                    <td ng-bind="tableData.stud_name||'-'"></td>
+                                    <td ng-bind="tableData.course_name||'-'"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                        <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                            <span>Showing</span>&nbsp;
+                            <span ng-bind="(myCtrl.startIndex*(myCtrl.limitIndex))+1"></span>&nbsp;
+                            <span>to</span>&nbsp;
+                            <span ng-bind="myCtrl.totalItems>(myCtrl.startIndex*(myCtrl.limitIndex))+(myCtrl.limitIndex)?(myCtrl.startIndex*(myCtrl.limitIndex))+(myCtrl.limitIndex):myCtrl.totalItems"></span>&nbsp;
+                            <span>of</span>&nbsp;
+                            <span ng-bind="myCtrl.totalItems"></span>&nbsp;
+                            <span>entries</span>
+                        </div>
+                        <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                            <span>
+                                <button class="prvsBtns" ng-disabled="myCtrl.startIndex == 0" ng-click="myCtrl.startIndex = myCtrl.startIndex - 1; myCtrl.setPage('get_sc_reg_data', myCtrl.startIndex);"><<
+                                </button>
+                            </span>
+                            <span>
+                                <span class="paginationnmbr" ng-repeat="item in myCtrl.itemsPaginated()" ng-click="myCtrl.setPage('get_sc_reg_data', item - 1)" ng-class="{'activepagintion':myCtrl.startIndex == item - 1,'deactivepagintion':myCtrl.startIndex != item - 1}" ng-bind="item" ng-disabled="true">
+                                </span>
+                            </span>
+                            <span>
+                                <button class="nextBtns" ng-disabled="myCtrl.startIndex >= myCtrl.totalItems / myCtrl.limitIndex - 1" ng-click="myCtrl.startIndex = myCtrl.startIndex + 1; myCtrl.setPage('get_sc_reg_data', myCtrl.startIndex);"> >>
+                                </button>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xs-12 col-sm-12 co-md-12 col-lg-12 bgclr-white mrgtop-2" ng-if="myCtrl.tableData.length==0" > 0>
+                    No Data to Show
+                </div>
+            </div>
+            <!-- Edit Modal Starts -->
+            <div class="modal" id="myModal">
+                <div class="modal-dialog">
+                <div class="modal-content">
+                
+                    <!-- Modal Header -->
+                    <div class="modal-header">
+                    <h4 class="modal-title">
+                        <span ng-if="myCtrl.editPopupType=='edit_sd'">Edit Student Details</span>
+                        <span ng-if="myCtrl.editPopupType=='edit_cd'">Edit Course Details</span>
+                    </h4>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    </div>
+                    
+                    <!-- Modal body -->
+                    <div class="modal-body">
+                        <div ng-if="myCtrl.editPopupType=='edit_sd'">
+                            <form class="form-horizontal">
+                                <div class="form-group">
+                                    <label class="control-label col-sm-4" for="efirst_name">First Name:</label>
+                                    <div class="col-sm-4">
+                                    <input type="text" class="form-control" maxlength="64" ng-model="myCtrl.regStudDet.first_name" id="efirst_name" placeholder="Enter First Name" >
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="control-label col-sm-4" for="elast_name">Last Name:</label>
+                                    <div class="col-sm-4">
+                                    <input type="text" class="form-control" maxlength="64" ng-model="myCtrl.regStudDet.last_name" id="elast_name" placeholder="Enter Last Name" >
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="control-label col-sm-4" for="edob">DOB:</label>
+                                    <div class="col-sm-4">
+                                    <input type="text"  class="form-control" disabled="true" ng-model="myCtrl.regStudDet.dob" id="edob" placeholder="Enter DOB" >
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="control-label col-sm-4" for="econtact_no">Contact No:</label>
+                                    <div class="col-sm-4">
+                                        <input type="number" class="form-control" ng-model="myCtrl.regStudDet.contact_no" id="econtact_no" placeholder="Enter Contact No" >
+                                    </div>
+                                </div>
+                                <div ng-if="myCtrl.showEditSd" class="red">Please fill all the required fields to proceed.</div>                                
+                            </form>
+                        </div>
+                        <div ng-if="myCtrl.editPopupType=='edit_cd'">
+                            <form class="form-horizontal">
+                                <div class="form-group">
+                                    <label class="control-label col-sm-4" for="ecourse_name">Course Name:</label>
+                                    <div class="col-sm-4">
+                                    <input type="text" class="form-control" maxlength="64" ng-model="myCtrl.regCourseDet.course_name" id="ecourse_name" placeholder="Enter Course Name" >
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="control-label col-sm-4" for="ecourse_details">Course Details:</label>
+                                    <div class="col-sm-4">
+                                        <textarea ng-model="myCtrl.regCourseDet.course_details" maxlength="264" id="ecourse_details" rows="4" cols="50" ></textarea>
+                                    </div>
+                                </div>
+                            </form>
+                            <div ng-if="myCtrl.showEditCd" class="red">Please fill all the required fields to proceed.</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Modal footer -->
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-default" ng-if="myCtrl.editPopupType=='edit_sd'" ng-click="myCtrl.validateDetails('edit_sd',myCtrl.regStudDet)">Submit</button>
+                        <button type="submit" class="btn btn-default" ng-if="myCtrl.editPopupType=='edit_cd'" ng-click="myCtrl.validateDetails('edit_cd',myCtrl.regCourseDet)">Submit</button>
+                        <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                    </div>
+                    
+                </div>
+                </div>
+            </div>
+            <!-- Delete Modal Starts -->
+            <div class="modal" id="deleteModal">
+                <div class="modal-dialog">
+                <div class="modal-content">
+                
+                    <!-- Modal Header -->
+                    <div class="modal-header">
+                    <h4 class="modal-title">
+                        <span ng-if="myCtrl.deletePopupType=='delete_sd'">Delete Student Details</span>  
+                        <span ng-if="myCtrl.deletePopupType=='delete_cd'">Delete Course Details</span>    
+                    </h4>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    </div>
+                    
+                    <!-- Modal body -->
+                    <div class="modal-body">
+                        <div>Are you sure, you want to delete this data?</div>
+                    </div>
+                    
+                    <!-- Modal footer -->
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-default" ng-if="myCtrl.deletePopupType=='delete_cd'" ng-click="myCtrl.deleteMenuDetails('delete_cd',myCtrl.deleteId)">Yes</button>
+                        <button type="submit" class="btn btn-default" ng-if="myCtrl.deletePopupType=='delete_sd'" ng-click="myCtrl.deleteMenuDetails('delete_sd',myCtrl.deleteId)">Yes</button>
+                        <button type="button" class="btn btn-danger" data-dismiss="modal">No</button>
+                    </div>
+                </div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
+<script>
+var app = angular.module('myApp', []);
+app.controller('myCtrl', function($scope,$http) {
+    
+    var myCtrl=this;
+
+    myCtrl.startIndex = 0;
+    myCtrl.limitIndex = 10;
+
+    // Fetching data for view pages
+    myCtrl.getMenuDetails =function(type, startIndex)
+    {
+        myCtrl.startIndex=startIndex;
+        var start_index=myCtrl.limitIndex*myCtrl.startIndex;
+        var limit_index=myCtrl.limitIndex;
+        $http({
+            method:"POST",
+            url:"index.php",
+            data: $.param({'type':type,'start_index':start_index,'limit_index':limit_index}),
+            headers: {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'}
+        }).then(function(res,status){
+            myCtrl.tableData=res.data.table_data;
+            myCtrl.totalItems = res.data.total_count;
+            myCtrl.noOfPages = Math.ceil(myCtrl.totalItems/myCtrl.limitIndex);
+        });
+    }
+
+    // Update student, course details
+    myCtrl.updateMenuDetails=function(type, data)
+    {
+        $http({
+            method:"POST",
+            url:"index.php",
+            data: $.param({'type':type, 'data':data}),
+            headers: {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'}
+        }).then(function(res,status){
+            if(res.data=="1"||res.data==1)
+            {
+                $('#myModal').modal('hide');
+                if(type=="edit_sd")
+                    myCtrl.getMenuDetails('view_sd',0);
+                else
+                    myCtrl.getMenuDetails('view_cd',0);
+            }
+                
+        });
+    }
+
+    // Delete student, course details
+    myCtrl.deleteMenuDetails=function(type, data)
+    {
+        $http({
+            method:"POST",
+            url:"index.php",
+            data: $.param({'type':type, 'data':data}),
+            headers: {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'}
+        }).then(function(res,status){
+            if(res.data=="1"||res.data==1)
+            {
+                $('#deleteModal').modal('hide');
+                if(type=="delete_sd")
+                    myCtrl.getMenuDetails('view_sd',0);
+                else
+                    myCtrl.getMenuDetails('view_cd',0);
+            }
+                
+        });
+    }
+
+    // Get student course reg data
+    myCtrl.getScRegData=function(type)
+    {
+        $http({
+            method:"POST",
+            url:"index.php",
+            data: $.param({'type':type}),
+            headers: {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'}
+        }).then(function(res,status){
+            myCtrl.studCourseData=res.data;
+        });
+    }
+
+    // Switch/Show menus
+    myCtrl.showMenu=function(param)
+    {
+        if(param=="reg_sd")
+        {
+            myCtrl.showRegStudDetPage=true;
+            myCtrl.showViewStudDetPage=false;
+            myCtrl.showRegCourseDetPage=false;
+            myCtrl.showViewCourseDetPage=false;
+            myCtrl.showReportPage=false;
+            myCtrl.showSCRegPage=false;
+            myCtrl.regStudDet={};
+        }
+        else if(param=="view_sd")
+        {
+            myCtrl.showRegStudDetPage=false;
+            myCtrl.showViewStudDetPage=true;
+            myCtrl.showRegCourseDetPage=false;
+            myCtrl.showViewCourseDetPage=false;
+            myCtrl.showReportPage=false;
+            myCtrl.showSCRegPage=false;
+            myCtrl.getMenuDetails('view_sd', 0);
+        }
+        if(param=="reg_cd")
+        {
+            myCtrl.showRegStudDetPage=false;
+            myCtrl.showViewStudDetPage=false;
+            myCtrl.showRegCourseDetPage=true;
+            myCtrl.showViewCourseDetPage=false;
+            myCtrl.showReportPage=false;
+            myCtrl.showSCRegPage=false;
+            myCtrl.regCourseDet={};
+        }
+        else if(param=="view_cd")
+        {
+            myCtrl.showRegStudDetPage=false;
+            myCtrl.showViewStudDetPage=false;
+            myCtrl.showRegCourseDetPage=false;
+            myCtrl.showViewCourseDetPage=true;
+            myCtrl.showReportPage=false;
+            myCtrl.showSCRegPage=false;
+            myCtrl.getMenuDetails('view_cd', 0);
+        }
+        else if(param=="sc_reg")
+        {
+            myCtrl.showRegStudDetPage=false;
+            myCtrl.showViewStudDetPage=false;
+            myCtrl.showRegCourseDetPage=false;
+            myCtrl.showViewCourseDetPage=false;
+            myCtrl.showReportPage=false;
+            myCtrl.showSCRegPage=true;
+            myCtrl.generateData('reset');
+            myCtrl.getScRegData('get_sc_data');
+        }
+        else if(param=="view_report")
+        {
+            myCtrl.showRegStudDetPage=false;
+            myCtrl.showViewStudDetPage=false;
+            myCtrl.showRegCourseDetPage=false;
+            myCtrl.showViewCourseDetPage=false;
+            myCtrl.showReportPage=true;
+            myCtrl.showSCRegPage=false;
+            myCtrl.getMenuDetails('get_sc_reg_data',0); 
+        }
+
+    }
+
+    myCtrl.showMenu('reg_sd');
+
+    // Used to save student, course details    
+    myCtrl.saveMenuDetails=function(type, data)
+    {       
+        if(type!="save_sc_reg") 
+            data.dob=$('#birthday').val();
+        $http({
+            method:"POST",
+            url:"index.php",
+            data: $.param({'type':type, 'data':data}),
+            headers: {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'}
+        }).then(function(res,status){
+            if(res.data=="1"||res.data==1)
+            {
+                $('#birthday').val('');
+                myCtrl.regStudDet={};
+                myCtrl.regCourseDet={};
+                myCtrl.generateData('reset');
+            }
+                
+        });
+    }
+
+    myCtrl.showEditSd=false;
+    myCtrl.showEditCd=false;
+    myCtrl.showRegSd=false;
+    myCtrl.showRegCd=false;
+    myCtrl.showScRegFlag=false;
+    // To validate data fields
+    myCtrl.validateDetails=function(type, data)
+    {
+        if(type=="edit_sd")
+        {
+            if(data.first_name!=""&&data.last_name!=""&&data.contact_no!=""&&data.first_name!=null&&data.last_name!=null&&data.contact_no!=null)
+            {
+                myCtrl.showEditSd=false;
+                myCtrl.updateMenuDetails(type, data);
+            }
+            else
+                myCtrl.showEditSd=true;
+        }
+
+        if(type=="edit_cd")
+        {
+            if(data.course_name!=""&&data.course_details!=""&&data.course_name!=null&&data.course_details!=null)
+            {
+                myCtrl.showEditCd=false;
+                myCtrl.updateMenuDetails(type, data);
+            }
+            else
+                myCtrl.showEditCd=true;
+        }   
+        if(type=="reg_sd")
+        {
+            if(Object.keys(data).length==0||angular.isUndefined(data.first_name)||angular.isUndefined(data.last_name)||angular.isUndefined(data.contact_no)||$('#birthday').val()=="")
+                myCtrl.showRegSd=true;
+            else
+            {
+                myCtrl.showRegSd=false;
+                myCtrl.saveMenuDetails(type, data);
+            }
+        }  
+        if(type=="reg_cd")
+        {
+            if(Object.keys(data).length==0||angular.isUndefined(data.course_name)||angular.isUndefined(data.course_details))
+                myCtrl.showRegCd=true;
+            else
+            {
+                myCtrl.showRegCd=false;
+                myCtrl.saveMenuDetails(type, data);
+            }
+        } 
+        if(type=="save_sc_reg")
+        {
+            var cnt=0;
+            angular.forEach(data,function(value,key)
+            {
+                if(value.course_id==""||angular.isUndefined(value.course_id)||value.course_id==null||value.stud_id==""||angular.isUndefined(value.stud_id)||value.stud_id==null)
+                {
+                   cnt++;
+                }
+
+            });
+            if((Object.keys(data).length>0&&cnt>0)||Object.keys(data).length==0)
+                myCtrl.showScRegFlag=true;
+            else
+            {
+                myCtrl.showScRegFlag=false;
+                myCtrl.saveMenuDetails(type, data);
+            }
+        } 
+        
+    }
+    
+    // Open modal popup
+    myCtrl.openModal=function(id, action, type, data)
+    {
+        if(action=="edit")
+        {
+            $('#'+id).modal('show');
+            myCtrl.editPopupType=type;
+            if(type=="edit_sd")
+            {
+                myCtrl.regStudDet=data;
+                myCtrl.regStudDet.contact_no=parseInt(data.contact_no);
+            }
+            else if(type=="edit_cd")
+                myCtrl.regCourseDet=data;
+                
+        }
+        else if(action=="delete")
+        {
+            $('#'+id).modal('show');
+            myCtrl.deleteId=data;
+            myCtrl.deletePopupType=type;
+        }
+        
+    }
+
+    myCtrl.scData=[{'data':"data"}];
+    // Generate array data
+    myCtrl.generateData=function(type)
+    {
+        if(type=="reset")
+        {
+            myCtrl.scData=[];
+            myCtrl.scReg=[];
+        }
+        myCtrl.scData.push({'data':"data"});
+    }
+
+    // Pagination
+    myCtrl.setPage = function(type, pageNo) {
+        myCtrl.startIndex=pageNo;
+        myCtrl.getMenuDetails(type, myCtrl.startIndex);
+    }
+
+    // Pagination
+    myCtrl.itemsPaginated = function () {
+        if(myCtrl.noOfPages!=''&&myCtrl.noOfPages>0)
+        {
+            if(myCtrl.noOfPages>5)
+            {
+            var currentPageIndex = myCtrl.startIndex+1;
+            if(currentPageIndex>=5)
+                currentPageIndex=currentPageIndex-5;
+            else
+                currentPageIndex=0;
+            var noOfPages = new Array(myCtrl.noOfPages).join().split(',')
+                                .map(function(item, index){ return ++index;});
+            return noOfPages.slice(
+                currentPageIndex, 
+                currentPageIndex + 5);
+            }
+            else
+            {
+                var noOfPages = new Array(myCtrl.noOfPages).join().split(',')
+                                .map(function(item, index){ return ++index;});
+                return noOfPages;
+            }
+        }
+    }
+});
+</script>
+
+<style type="text/css">
+body{background-color: #39828e99;height:670px;
+ background-image: url("https://fedena.com/blog/wp-content/uploads/2018/02/2018-02-23.jpg");
+background-size: cover;}
+h2,h5{color:#0068bc;}
+.mrgtop-2{margin-top: 2px;}
+.mrgbtm-40{margin-bottom: 40px;}
+.error-code{background-color: white;color: black;font-size: 16px;
+    font-weight: 600;height: 450px;text-align: center;padding-top: 218px;margin-top: 87px;border-radius: 4px;}
+.bgclr-white{background-color: white;}
+.nextBtns,.prvsBtns{padding:3px 12px!important;background-color:white;font-size:10px;border:0;color:#444}
+.prvsBtns{margin-right:2px}
+.deactivepagintion:hover,.nextBtns:hover,.prvsBtns:hover{background-color:#05b1e8;color:white;border:0}
+.nextBtns{margin-left:0}
+.paginationnmbr{padding:3px 8px!important;margin-right:5px}
+.activepagintion,.deactivepagintion{text-align:center;cursor:pointer;position:relative;top:1px;display:inline-block}
+.activepagintion{background-color:#05b1e8 !important;color:white !important;}
+.deactivepagintion{background-color:white !important;border:0;color:#666 !important;}
+.graph-style{min-width: 310px; max-width: 800px; height: 450px; margin-top: 40px;}
+.div1{background-color: white;height: 85px;bottom: 30px;border-radius: 4px;}
+.div2{padding-top: 10px;color:black;}
+.div3{padding-top: 6px;}
+.link-disable{cursor: default !important;pointer-events: none;}
+.fntwgt-600{font-weight: 600;}
+.cpointer{cursor:pointer;}
+ul {list-style-type: none; margin: 0;padding: 0;overflow: hidden;background-color: #dddddd;}
+li {float: left;}
+li a {display: block;padding: 8px;}
+.menu-title{text-align: center;margin: 37px;font-size: 24px;color: #0077c8;font-weight: bold;}
+a{color: black !important;}
+.btn-mgn{margin-left: 395px; margin-top: 50px;}
+.mgn-top-50{margin-top: 50px;}
+.red{color: red;}
+.txt-center{text-align:center;}
+</style>
